@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Carreras 3D</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.js"></script>
+    <script>
+        // Configuración básica de la escena, cámara y renderizador
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Crear una pista (plano) y un coche (cubo)
+        const planeGeometry = new THREE.PlaneGeometry(50, 50);
+        const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = Math.PI / 2;
+        scene.add(plane);
+
+        const carGeometry = new THREE.BoxGeometry(2, 1, 4);
+        const carMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const car = new THREE.Mesh(carGeometry, carMaterial);
+        car.position.y = 0.5;
+        scene.add(car);
+
+        // Configurar la cámara
+        camera.position.z = 10;
+        camera.position.y = 5;
+        camera.lookAt(0, 0, 0);
+
+        // Configurar los controles de la cámara
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        controls.enableZoom = true;
+
+        // Movimiento del coche
+        const keys = {};
+        document.addEventListener('keydown', (event) => {
+            keys[event.code] = true;
+        });
+        document.addEventListener('keyup', (event) => {
+            keys[event.code] = false;
+        });
+
+        function moveCar() {
+            if (keys['ArrowUp']) car.position.z -= 0.1;
+            if (keys['ArrowDown']) car.position.z += 0.1;
+            if (keys['ArrowLeft']) car.position.x -= 0.1;
+            if (keys['ArrowRight']) car.position.x += 0.1;
+        }
+
+        // Función para animar la escena
+        function animate() {
+            requestAnimationFrame(animate);
+
+            moveCar();
+            controls.update(); // Solo requerido si controls.enableDamping o controls.autoRotate son true
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Manejo del redimensionamiento de la ventana
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
